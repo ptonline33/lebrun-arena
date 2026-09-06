@@ -129,8 +129,9 @@ export default function Arena() {
     const onFullscreen = () => {
       const fullscreen =
         document.fullscreenElement ?? (document as Document & { webkitFullscreenElement?: Element }).webkitFullscreenElement;
-      const orientation = screen.orientation as ScreenOrientation & {
-        lock?: (o: OrientationLockType) => Promise<void>;
+      const orientation = screen.orientation as unknown as {
+        lock?: (o: string) => Promise<void>;
+        unlock?: () => void;
       };
       try {
         if (fullscreen) {
