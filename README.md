@@ -4,7 +4,7 @@ Every ping pong **full match from 2025–26** featuring **Félix Lebrun** or **A
 pulled live from the [WTT Global](https://www.youtube.com/@wttglobal) YouTube channel and
 ready to watch in the browser.
 
-![stack](https://img.shields.io/badge/Next.js-16-black) ![stack](https://img.shields.io/badge/React-19-blue) ![stack](https://img.shields.io/badge/Tailwind-v4-gold)
+![stack](https://img.shields.io/badge/Next.js-16-black) ![stack](https://img.shields.io/badge/React-19-blue) [![stack](https://img.shields.io/badge/PWA-✓-gold)](https://lebrun-arena.vercel.app)
 
 ## How it works
 
@@ -15,17 +15,21 @@ ready to watch in the browser.
 - `app/api/matches/route.ts` — serverless endpoint. 45-minute in-memory cache, CDN
   revalidation every 6 hours, and a committed snapshot (`data/matches.json`) as a fallback
   if the live scan fails. Runs up to 300s (Vercel Hobby Fluid Compute).
-- `app/components/Arena.tsx` — the extravagantly gold, glassmorphic UI: animated aura,
+- `components/Arena.tsx` — the extravagantly gold, glassmorphic UI: animated aura,
   floating ping-pong balls, gradient shimmer headline, filter chips, search, stat cards,
   and an in-app YouTube player modal.
 - `scripts/snapshot.mjs` — regenerates the fallback snapshot: `node scripts/snapshot.mjs`.
+- **PWA** — installable via `app/manifest.ts` (gold `LK` icons in `public/icons/`), a
+  Serwist service worker built at build time (`serwist.config.js` → `public/sw.js`) that
+  offlines the app shell and match data, an offline fallback page at `/~offline`, plus
+  an install prompt and online/offline pill (`components/PwaStatus.tsx`).
 
 ## Local development
 
 ```bash
 npm install
 npm run dev        # http://localhost:3000
-npm run build      # production build
+npm run build      # production build + generates public/sw.js (serwist build)
 npm start          # serve the production build
 ```
 
