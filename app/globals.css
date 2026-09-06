@@ -1,26 +1,252 @@
 @import "tailwindcss";
 
+@theme {
+  --color-night: #04050d;
+  --color-abyss: #080b18;
+  --color-navy: #0c1130;
+  --color-gold: #d4af37;
+  --color-gold-soft: #f3d97b;
+  --color-gold-dim: #a07f22;
+  --color-cream: #f7f1e1;
+  --color-ember: #ff5d38;
+  --font-display: var(--font-cinzel), "Georgia", serif;
+  --font-sans: var(--font-manrope), "Segoe UI", system-ui, sans-serif;
+}
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  color-scheme: dark;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html {
+  scroll-behavior: smooth;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: var(--color-night);
+  color: var(--color-cream);
+  overflow-x: hidden;
+}
+
+::selection {
+  background: rgba(212, 175, 55, 0.35);
+  color: #fff;
+}
+
+/* ---------- scrollbar ---------- */
+::-webkit-scrollbar {
+  width: 10px;
+}
+::-webkit-scrollbar-track {
+  background: #070914;
+}
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #d4af37, #7a5f1a);
+  border-radius: 8px;
+  border: 2px solid #070914;
+}
+
+/* ---------- gold shimmer text ---------- */
+.gold-text {
+  background: linear-gradient(
+    100deg,
+    #8a6a1a 0%,
+    #d4af37 20%,
+    #fff3c4 38%,
+    #f6dc8c 50%,
+    #d4af37 62%,
+    #7a5f1a 100%
+  );
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: shimmer 6s linear infinite;
+}
+
+@keyframes shimmer {
+  to {
+    background-position: -200% center;
+  }
+}
+
+/* ---------- ambient aura ---------- */
+.aura {
+  position: fixed;
+  inset: 0;
+  z-index: -2;
+  pointer-events: none;
+  background:
+    radial-gradient(60rem 40rem at 15% -5%, rgba(212, 175, 55, 0.14), transparent 60%),
+    radial-gradient(50rem 35rem at 90% 10%, rgba(60, 90, 255, 0.12), transparent 60%),
+    radial-gradient(70rem 50rem at 50% 110%, rgba(255, 61, 61, 0.08), transparent 60%),
+    #04050d;
+}
+
+.aura::before,
+.aura::after {
+  content: "";
+  position: absolute;
+  border-radius: 9999px;
+  filter: blur(90px);
+  opacity: 0.5;
+}
+.aura::before {
+  width: 34rem;
+  height: 34rem;
+  top: -8rem;
+  left: -8rem;
+  background: radial-gradient(circle, rgba(212, 175, 55, 0.35), transparent 70%);
+  animation: drift 26s ease-in-out infinite alternate;
+}
+.aura::after {
+  width: 40rem;
+  height: 40rem;
+  bottom: -12rem;
+  right: -10rem;
+  background: radial-gradient(circle, rgba(70, 100, 255, 0.28), transparent 70%);
+  animation: drift 34s ease-in-out infinite alternate-reverse;
+}
+
+@keyframes drift {
+  from {
+    transform: translate(0, 0) scale(1);
+  }
+  to {
+    transform: translate(6rem, 4rem) scale(1.15);
+  }
+}
+
+/* ---------- floating ping-pong balls ---------- */
+.ping-balls {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  overflow: hidden;
+}
+.ball {
+  position: absolute;
+  bottom: -12vh;
+  border-radius: 9999px;
+  background: radial-gradient(circle at 32% 30%, #fff, #e8d9a0 55%, #b3912f 100%);
+  box-shadow: 0 0 18px rgba(246, 220, 140, 0.7);
+  opacity: 0.35;
+  animation: rise linear infinite;
+}
+@keyframes rise {
+  0% {
+    transform: translateY(0) translateX(0) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-55vh) translateX(4vw) rotate(180deg);
+  }
+  100% {
+    transform: translateY(-130vh) translateX(-3vw) rotate(360deg);
+  }
+}
+
+/* ---------- glass card ---------- */
+.glass {
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.07), rgba(255, 255, 255, 0.02));
+  border: 1px solid rgba(214, 179, 90, 0.18);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  box-shadow: 0 20px 50px -20px rgba(0, 0, 0, 0.7);
+  transition: transform 0.35s ease, box-shadow 0.35s ease, border-color 0.35s ease;
+}
+.glass:hover {
+  transform: translateY(-6px);
+  border-color: rgba(243, 217, 123, 0.55);
+  box-shadow:
+    0 26px 60px -18px rgba(0, 0, 0, 0.85),
+    0 0 30px -4px rgba(212, 175, 55, 0.35);
+}
+.glass-thumb {
+  overflow: hidden;
+}
+.glass-thumb img {
+  transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.glass:hover .glass-thumb img {
+  transform: scale(1.07);
+}
+
+/* ---------- gold outline button ---------- */
+.gold-outline {
+  border: 1px solid rgba(212, 175, 55, 0.5);
+  color: var(--color-gold-soft);
+  transition: all 0.25s ease;
+}
+.gold-outline:hover {
+  background: rgba(212, 175, 55, 0.12);
+  box-shadow: 0 0 20px -6px rgba(212, 175, 55, 0.5);
+  color: #fff;
+}
+
+/* ---------- marquee ---------- */
+.marquee-track {
+  display: flex;
+  gap: 2.5rem;
+  width: max-content;
+  animation: marquee 42s linear infinite;
+}
+.marquee:hover .marquee-track {
+  animation-play-state: paused;
+}
+@keyframes marquee {
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+/* ---------- entrance ---------- */
+.fade-up {
+  opacity: 0;
+  animation: fadeUp 0.7s ease forwards;
+}
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ---------- tiny spin ring ---------- */
+.spin-slow {
+  animation: spinslow 14s linear infinite;
+}
+@keyframes spinslow {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ---------- pulse dot ---------- */
+.pulse-dot {
+  animation: pulsedot 1.6s ease-in-out infinite;
+}
+@keyframes pulsedot {
+  0%,
+  100% {
+    opacity: 1;
+    box-shadow: 0 0 0 0 rgba(255, 93, 56, 0.7);
+  }
+  50% {
+    opacity: 0.7;
+    box-shadow: 0 0 0 8px rgba(255, 93, 56, 0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }
