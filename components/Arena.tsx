@@ -125,6 +125,31 @@ export default function Arena() {
     return () => ctrl.abort();
   }, []);
 
+  useEffect(() => {
+    const onFullscreen = () => {
+      const fullscreen =
+        document.fullscreenElement ?? (document as Document & { webkitFullscreenElement?: Element }).webkitFullscreenElement;
+      const orientation = screen.orientation as ScreenOrientation & {
+        lock?: (o: OrientationLockType) => Promise<void>;
+      };
+      try {
+        if (fullscreen) {
+          orientation.lock?.("landscape")?.catch?.(() => {});
+        } else {
+          orientation.unlock?.();
+        }
+      } catch {
+        /* Orientation lock unavailable (e.g. iOS Safari) */
+      }
+    };
+    document.addEventListener("fullscreenchange", onFullscreen);
+    document.addEventListener("webkitfullscreenchange", onFullscreen);
+    return () => {
+      document.removeEventListener("fullscreenchange", onFullscreen);
+      document.removeEventListener("webkitfullscreenchange", onFullscreen);
+    };
+  }, []);
+
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
     let list = matches;
