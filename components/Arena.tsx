@@ -358,25 +358,25 @@ export default function Arena() {
       {/* ------------ MODAL ------------ */}
       {active && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 p-4 backdrop-blur-md"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 p-4"
           onClick={() => setActive(null)}
           role="dialog"
           aria-modal="true"
         >
           <div
-            className="glass w-full max-w-4xl rounded-3xl overflow-hidden animate-[fadeUp_0.35s_ease]"
+            className="flex w-full max-w-4xl max-h-[92dvh] flex-col overflow-hidden rounded-3xl border border-gold/20 bg-[#0c0f16] shadow-[0_20px_60px_-20px_rgba(0,0,0,0.9)] animate-[fadeUp_0.35s_ease]"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="relative aspect-video bg-black">
+            <div className="relative aspect-video w-full max-h-[56dvh] bg-black">
               <iframe
                 className="h-full w-full"
                 src={`https://www.youtube-nocookie.com/embed/${active.id}?autoplay=1&rel=0&color=white`}
                 title={active.title}
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; fullscreen; gyroscope; picture-in-picture; web-share"
                 allowFullScreen
               />
             </div>
-            <div className="p-6">
+            <div className="overflow-y-auto p-6">
               <div className="flex flex-wrap items-start justify-between gap-4">
                 <div>
                   <p className="text-[11px] font-bold uppercase tracking-[0.3em] text-gold">
