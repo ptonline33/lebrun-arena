@@ -105,6 +105,9 @@ export default function Arena() {
   const [chip, setChip] = useState<Chip>("all");
   const [query, setQuery] = useState("");
   const [active, setActive] = useState<Match | null>(null);
+  const [spinning, setSpinning] = useState(false);
+  const [reelTitle, setReelTitle] = useState("");
+  const spinTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const gridRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -180,6 +183,30 @@ export default function Arena() {
 
   const scrollToGrid = () => gridRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
 
+  const spin = () => {
+    const options = filtered;
+    if (!options.length || spinning) return;
+    setSpinning(true);
+    const target = options[Math.floor(Math.random() * options.length)];
+    const start = performance.now();
+    const tick = () => {
+      const pick = options[Math.floor(Math.random() * options.length)];
+      setReelTitle(pick.playersText || pick.title);
+      if (performance.now() - start < 2400) {
+        spinTimer.current = setTimeout(tick, 50 + Math.random() * 90);
+      } else {
+        setSpinning(false);
+        setReelTitle("");
+        setActive(target);
+      }
+    };
+    tick();
+  };
+
+  useEffect(() => () => {
+    if (spinTimer.current) clearTimeout(spinTimer.current);
+  }, []);
+
   return (
     <main className="relative">
       <div className="aura" aria-hidden />
@@ -228,6 +255,13 @@ export default function Arena() {
           >
             ENTER THE ARENA
           </button>
+          <button
+            onClick={spin}
+            disabled={spinning}
+            className="rounded-full bg-gradient-to-br from-ember to-[#b3361f] px-8 py-3 font-display text-sm font-bold tracking-[0.2em] text-cream transition hover:scale-105 hover:shadow-[0_0_35px_rgba(255,93,56,0.45)] disabled:opacity-60"
+          >
+            {spinning ? "DEALING…" : "RANDOM MATCH 🏓"}
+          </button>
           <a
             href="https://www.youtube.com/@wttglobal"
             target="_blank"
@@ -242,6 +276,19 @@ export default function Arena() {
           {loading ? "Powering up the arena…" : `${stats.total} matches staged · updated ${updatedAt ? new Date(updatedAt).toUTCString().slice(0, 22) : "now"}`}
         </p>
       </header>
+
+      {/* ------------ RANDOM MATCH REEL ------------ */}
+      {spinning && (
+        <div className="relative z-10 mx-auto -mt-1 max-w-3xl px-6 pb-2">
+          <div className="flex flex-col items-center gap-1 rounded-3xl border border-gold/40 bg-black/70 px-6 py-4 text-center shadow-[0_0_30px_rgba(212,175,55,0.25)] backdrop-blur">
+            <span className="text-[10px] font-bold uppercase tracking-[0.4em] text-gold">Random Match</span>
+            <span className="gold-text font-display text-lg font-bold sm:text-xl">{reelTitle}</span>
+            <span className="mt-1 flex items-center gap-2 text-[10px] uppercase tracking-widest text-white/50">
+              <span className="pulse-dot h-2 w-2 rounded-full bg-ember" /> dealing the next match
+            </span>
+          </div>
+        </div>
+      )}
 
       <Marquee />
 
