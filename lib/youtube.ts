@@ -249,6 +249,19 @@ async function fetchPage(pageNum: number, visitor?: string, token?: string) {
   return { videos, token: scrollTo(grid), visitor: json.responseContext?.visitorData as string };
 }
 
+async function fetchPageWithRetry(pageNum: number, visitor?: string, token?: string): Promise<ReturnType<typeof fetchPage>> {
+  const attempts = [0, 800, 2400];
+  for (let i = 0; i < attempts.length; i++) {
+    try {
+      return await fetchPage(pageNum, visitor, token);
+    } catch (e) {
+      if (i === attempts.length - 1) throw e;
+      await new Promise((r) => setTimeout(r, attempts[i]));
+    }
+  }
+  throw new Error("unreachable");
+}
+
 function dedupe(matches: Match[]): Match[] {
   const seen = new Map<string, Match>();
   const order: string[] = [];
@@ -276,7 +289,12 @@ function dedupe(matches: Match[]): Match[] {
     .sort((a, b) => (a.publishedAt < b.publishedAt ? 1 : -1));
 }
 
-export async function fetchLebrunMatches(opts?: { seasonStart?: string; maxPages?: number }): Promise<Match[]> {
+export interface LebrunCrawl {
+  matches: Match[];
+  complete: boolean;
+}
+
+export async function fetchLebrunMatches(opts?: { seasonStart?: string; maxPages?: number }): Promise<LebrunCrawl> {
   const seasonStart = opts?.seasonStart ?? SEASON_START;
   const maxPages = opts?.maxPages ?? MAX_PAGES;
   const start = Date.now();
@@ -285,19 +303,31 @@ export async function fetchLebrunMatches(opts?: { seasonStart?: string; maxPages
   let visitor: string | undefined;
   let page = 0;
   let token: string | undefined;
+  let complete = false;
   while (page < maxPages) {
     page++;
+    let res: Awaited<ReturnType<typeof fetchPageWithRetry>>;
     try {
-      const res = await fetchPage(page, visitor, token);
-      for (const v of res.videos) if (/lebrun/i.test(v.title)) raw.push(v);
-      visitor = res.visitor || visitor;
-      token = res.token;
-      if (!token) break;
-      const tail = raw[raw.length - 1];
-      if (tail && /^(2|3|4|5)\s+years ago/.test(tail.rel) && page > 8) break;
+      res = await fetchPageWithRetry(page, visitor, token);
     } catch (e) {
-      if (page > 1) break;
-      throw e;
+      if (page === 1) {
+        console.warn(`[crawl] first request failed on page 1: ${e instanceof Error ? e.message : e}`);
+        throw e instanceof Error ? e : new Error("crawl failed");
+      }
+      console.warn(`[crawl] continuation interrupted at page ${page}; crawl incomplete`);
+      break;
+    }
+    for (const v of res.videos) if (/lebrun/i.test(v.title)) raw.push(v);
+    visitor = res.visitor || visitor;
+    token = res.token;
+    if (!token) {
+      complete = true;
+      break;
+    }
+    const tail = raw[raw.length - 1];
+    if (tail && /^(2|3|4|5)\s+years ago/.test(tail.rel) && page > 8) {
+      complete = true;
+      break;
     }
     if (Date.now() - start > 260000) break;
     await new Promise((r) => setTimeout(r, PAGE_DELAY_MS));
@@ -319,7 +349,7 @@ export async function fetchLebrunMatches(opts?: { seasonStart?: string; maxPages
   }
 
   const unique = dedupe(matches);
-  return unique.sort((a, b) => (a.publishedAt < b.publishedAt ? 1 : -1));
+  return { matches: unique.sort((a, b) => (a.publishedAt < b.publishedAt ? 1 : -1)), complete };
 }
 
 export const WTT_GLOBAL = { channelId: CHANNEL_ID, handle: CHANNEL_HANDLE };
