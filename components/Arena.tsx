@@ -6,7 +6,6 @@ import type { Match } from "@/lib/youtube";
 type Chip =
   | "all"
   | "full"
-  | "highlights"
   | "singles"
   | "doubles"
   | "mixed"
@@ -18,7 +17,6 @@ const CHIPS: { id: Chip; label: string }[] = [
   { id: "singles", label: "Singles" },
   { id: "doubles", label: "Doubles" },
   { id: "mixed", label: "Mixed" },
-  { id: "highlights", label: "Highlights" },
 ];
 
 function cap(s: string): string {
@@ -30,7 +28,7 @@ function cap(s: string): string {
 }
 
 function kindLabel(kind: Match["kind"]): string {
-  return kind === "full" ? "FULL MATCH" : kind === "highlight" ? "HIGHLIGHT" : "MATCH";
+  return kind === "full" ? "FULL MATCH" : "MATCH";
 }
 
 function Balls() {
@@ -159,7 +157,6 @@ export default function Arena() {
     let list = matches;
     if (chip !== "all") {
       if (chip === "full") list = list.filter((m) => m.kind === "full");
-      else if (chip === "highlights") list = list.filter((m) => m.kind === "highlight");
       else if (chip === "singles")
         list = list.filter((m) => !m.player.includes("/") && !m.opponent.includes("/"));
       else if (chip === "doubles")

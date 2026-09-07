@@ -16,7 +16,7 @@ export const SEASON_START = "2025-01-01T00:00:00Z";
 const MAX_PAGES = 330;
 const PAGE_DELAY_MS = 160;
 
-export type MatchKind = "full" | "match" | "highlight";
+export type MatchKind = "full" | "match";
 
 export interface Match {
   id: string;
@@ -152,7 +152,6 @@ function approxFromRel(rel: string, now: Date): Date {
 
 const NON_MATCH = /interview|post[- ]match|press conference|behind[- ]the[- ]scenes|meet the|mic.?d ?up|presser|cermony|top (10|points)|best of|reaction|documentary|vlog|training|feast|digest|recap|analys|breakdown|bts|highlights of the year|young talent|day out|brothers|sightseeing|universal studios|music video|challenge|danc/i;
 
-const HIGHLIGHT_HINT = /highlight|top points|top 10|best of|extended highlights|in 60 seconds|compilation/i;
 
 function durationToLabel(secs: number | null): string {
   if (secs == null || secs < 0) return "—";
@@ -167,9 +166,8 @@ function durationToLabel(secs: number | null): string {
 function classify(title: string, durSecs: number | null): MatchKind | null {
   if (NON_MATCH.test(title)) return null;
   if (/full match|official video|extended cut/i.test(title) || (durSecs ?? 0) >= 1200) return "full";
-  if (HIGHLIGHT_HINT.test(title)) return "highlight";
   if (/ vs | match |final|stern/i.test(title) || (durSecs ?? 0) >= 600) return "match";
-  return "highlight";
+  return null;
 }
 
 export function normalizeKey(s: string): string {
@@ -279,7 +277,7 @@ function dedupe(matches: Match[]): Match[] {
       seen.set(key, m);
       order.push(key);
     } else {
-      const prio = { full: 0, match: 1, highlight: 2 };
+      const prio = { full: 0, match: 1 };
       if ((prio[m.kind] ?? 3) < (prio[existing.kind] ?? 3)) seen.set(key, m);
     }
   }

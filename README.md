@@ -11,7 +11,7 @@ ready to watch in the browser.
 - `lib/youtube.ts` — a **no-key crawler** that pages through the WTT Global uploads feed
   (channel `UC9ckyA_A3MfXUa0ttxMoIZw`) using YouTube's public innertube web API, then
   filters titles for Lebrun matches published in the 2025–26 window, dedupes same-match
-  uploads, and classifies each video as `full` / `match` / `highlight`.
+  uploads, and classifies each video as `full` / `match`.
 - `app/api/matches/route.ts` — serverless endpoint. 45-minute in-memory cache, CDN
   revalidation every 6 hours, and a committed snapshot (`data/matches.json`) as a fallback
   if the live scan fails. Runs up to 300s (Vercel Hobby Fluid Compute).
